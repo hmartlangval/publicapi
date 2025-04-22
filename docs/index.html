@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School REST API Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    h1, h2, h3 {
+      color: #0066aa;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+    .endpoints {
+      flex: 1;
+    }
+    .result {
+      flex: 2;
+      padding: 20px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      overflow: auto;
+    }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    .endpoint {
+      margin-bottom: 10px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 4px;
+      background-color: #e9f5ff;
+      transition: background-color 0.2s;
+    }
+    .endpoint:hover {
+      background-color: #d0e8ff;
+    }
+    .active {
+      background-color: #0066aa;
+      color: white;
+    }
+    code {
+      background-color: #f0f0f0;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: Consolas, monospace;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .github-link {
+      display: inline-block;
+      padding: 8px 15px;
+      background-color: #24292e;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .github-link:hover {
+      background-color: #3a3a3a;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>School REST API</h1>
+    <a href="https://github.com/yourusername/your-repo-name" class="github-link">View on GitHub</a>
+  </div>
+  
+  <p>This is a demonstration of the School REST API. Click on any endpoint to see the response.</p>
+  
+  <div class="container">
+    <div class="endpoints">
+      <h2>Classes</h2>
+      <div class="endpoint" data-url="/api/classes">GET /api/classes</div>
+      <div class="endpoint" data-url="/api/classes/CLS001">GET /api/classes/CLS001</div>
+      <div class="endpoint" data-url="/api/classes/CLS001/students">GET /api/classes/CLS001/students</div>
+      
+      <h2>Students</h2>
+      <div class="endpoint" data-url="/api/students">GET /api/students</div>
+      <div class="endpoint" data-url="/api/students/STU00101">GET /api/students/STU00101</div>
+      <div class="endpoint" data-url="/api/students/STU00101/classes">GET /api/students/STU00101/classes</div>
+      
+      <h2>Filtered Queries</h2>
+      <div class="endpoint" data-url="/api/classes?subject=Mathematics">GET /api/classes?subject=Mathematics</div>
+      <div class="endpoint" data-url="/api/students?grade=9">GET /api/students?grade=9</div>
+    </div>
+    
+    <div class="result">
+      <h3>API Response</h3>
+      <pre id="result">Click an endpoint to see its response.</pre>
+    </div>
+  </div>
+  
+  <h2>API Documentation</h2>
+  <p>This API provides data about school classes and students. It includes the following endpoints:</p>
+  
+  <h3>Classes</h3>
+  <ul>
+    <li><code>GET /api/classes</code> - Get all classes</li>
+    <li><code>GET /api/classes/:id</code> - Get a specific class by ID</li>
+    <li><code>GET /api/classes/:classId/students</code> - Get all students in a specific class</li>
+  </ul>
+  
+  <h3>Students</h3>
+  <ul>
+    <li><code>GET /api/students</code> - Get all students</li>
+    <li><code>GET /api/students/:id</code> - Get a specific student by ID</li>
+    <li><code>GET /api/students/:id/classes</code> - Get all classes for a specific student</li>
+  </ul>
+  
+  <p>
+    <strong>Note:</strong> This is the static GitHub Pages version of the API. 
+    For full functionality including POST, PUT, and DELETE operations, 
+    run the API server locally.
+  </p>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const resultDisplay = document.getElementById('result');
+      const endpoints = document.querySelectorAll('.endpoint');
+      
+      endpoints.forEach(endpoint => {
+        endpoint.addEventListener('click', function() {
+          // Remove active class from all endpoints
+          endpoints.forEach(ep => ep.classList.remove('active'));
+          
+          // Add active class to clicked endpoint
+          this.classList.add('active');
+          
+          // Get the API URL
+          const url = this.getAttribute('data-url');
+          
+          // Show loading state
+          resultDisplay.textContent = 'Loading...';
+          
+          // Fetch data from the API
+          fetch(url)
+            .then(response => response.json())
+            .then(data => {
+              resultDisplay.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+              resultDisplay.textContent = `Error: ${error.message}`;
+            });
+        });
+      });
+      
+      // Trigger click on the first endpoint to show some data initially
+      endpoints[0].click();
+    });
+  </script>
+</body>
+</html> 
