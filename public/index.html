@@ -77,7 +77,7 @@
 <body>
   <div class="header">
     <h1>School REST API</h1>
-    <a href="https://github.com/yourusername/your-repo-name" class="github-link">View on GitHub</a>
+    <a href="https://github.com/hmartlangval/publicapi" class="github-link">View on GitHub</a>
   </div>
   
   <p>This is a demonstration of the School REST API. Click on any endpoint to see the response.</p>
@@ -133,6 +133,10 @@
       const resultDisplay = document.getElementById('result');
       const endpoints = document.querySelectorAll('.endpoint');
       
+      // Check if running on GitHub Pages
+      const isGitHubPages = window.location.hostname.includes('github.io');
+      const repoPath = isGitHubPages ? '/publicapi' : '';
+      
       endpoints.forEach(endpoint => {
         endpoint.addEventListener('click', function() {
           // Remove active class from all endpoints
@@ -141,17 +145,49 @@
           // Add active class to clicked endpoint
           this.classList.add('active');
           
-          // Get the API URL
-          const url = this.getAttribute('data-url');
+          // Get the API URL and add repository path if on GitHub Pages
+          let url = this.getAttribute('data-url');
+          if (isGitHubPages) {
+            url = repoPath + url;
+          }
+          
+          // For GitHub Pages, use .json files directly
+          const jsonUrl = isGitHubPages ? url.replace('.html', '.json') : url;
           
           // Show loading state
           resultDisplay.textContent = 'Loading...';
           
           // Fetch data from the API
-          fetch(url)
-            .then(response => response.json())
-            .then(data => {
-              resultDisplay.textContent = JSON.stringify(data, null, 2);
+          fetch(jsonUrl)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+              return response.text();
+            })
+            .then(text => {
+              try {
+                // Try to parse as JSON
+                const data = JSON.parse(text);
+                resultDisplay.textContent = JSON.stringify(data, null, 2);
+              } catch (e) {
+                // If parsing fails, display the raw text
+                if (isGitHubPages) {
+                  // On GitHub Pages, try to extract JSON from HTML if needed
+                  try {
+                    const jsonMatch = text.match(/<pre id="json">([\s\S]*?)<\/pre>/);
+                    if (jsonMatch && jsonMatch[1]) {
+                      resultDisplay.textContent = jsonMatch[1];
+                    } else {
+                      resultDisplay.textContent = `Error parsing JSON: ${e.message}\n\nRaw content: ${text.substring(0, 500)}...`;
+                    }
+                  } catch (ex) {
+                    resultDisplay.textContent = `Error parsing: ${ex.message}\n\nRaw content: ${text.substring(0, 500)}...`;
+                  }
+                } else {
+                  resultDisplay.textContent = text;
+                }
+              }
             })
             .catch(error => {
               resultDisplay.textContent = `Error: ${error.message}`;
